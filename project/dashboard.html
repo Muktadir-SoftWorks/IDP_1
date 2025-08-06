@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Pet Adoption Center</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-top">
+                <div class="logo">
+                    <h1><a href="/">Pet Adoption Center </a></h1>
+                    <span>Buy & Sell Pets</span>
+                </div>
+                <div class="header-actions">
+                    <span id="user-name" class="user-name"></span>
+                    <button id="logout-btn" class="logout-btn">Logout</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Dashboard Navigation -->
+    <nav class="dashboard-nav">
+        <div class="container">
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab="post-ad">Post New Ad</button>
+                <button class="nav-tab" data-tab="my-donations">My Donations</button>
+                <button class="nav-tab" data-tab="applications">My Applications</button>
+                <button class="nav-tab" data-tab="adoptions">My Adoptions</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Dashboard Content -->
+    <main class="dashboard-main">
+        <div class="container">
+            <!-- Post Ad Tab -->
+            <div id="post-ad-tab" class="tab-content active">
+                <div class="post-ad-container">
+                    <h2>Post Your Pet Ad</h2>
+                    <form id="post-ad-form" class="post-ad-form" enctype="multipart/form-data">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="pet-name">Pet Name *</label>
+                                <input type="text" id="pet-name" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="pet-species">Category *</label>
+                                <select id="pet-species" name="species" required>
+                                    <option value="">Select Category</option>
+                                    <option value="Dog">Dog</option>
+                                    <option value="Cat">Cat</option>
+                                    <option value="Bird">Bird</option>
+                                    <option value="Rabbit">Rabbit</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="pet-breed">Breed *</label>
+                                <input type="text" id="pet-breed" name="breed" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="pet-age">Age (years) *</label>
+                                <input type="number" id="pet-age" name="age" min="0" max="30" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="pet-price">Price (BDT)</label>
+                                <input type="number" id="pet-price" name="price" min="0" placeholder="Leave empty for free">
+                            </div>
+                            <div class="form-group">
+                                <label for="pet-location">Location *</label>
+                                <select id="pet-location" name="location" required>
+                                    <option value="">Select Location</option>
+                                    <option value="dhaka">Dhaka</option>
+                                    <option value="chittagong">Chittagong</option>
+                                    <option value="sylhet">Sylhet</option>
+                                    <option value="rajshahi">Rajshahi</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pet-image">Pet Photo *</label>
+                            <input type="file" id="pet-image" name="image" accept="image/*" required>
+                            <small>Upload a clear photo of your pet</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pet-bio">Description *</label>
+                            <textarea id="pet-bio" name="bio" rows="5" placeholder="Describe your pet's personality, health, vaccination status, etc." required></textarea>
+                        </div>
+
+                        <button type="submit" class="submit-btn">Post Ad</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- My Donations Tab -->
+            <div id="my-donations-tab" class="tab-content">
+                <h2>My Donated Pets</h2>
+                <div id="my-donations-grid" class="my-donations-grid">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading your donations...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Applications Tab -->
+            <div id="applications-tab" class="tab-content">
+                <h2>My Adoption Applications</h2>
+                <div id="applications-grid" class="applications-grid">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading your applications...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Adoptions Tab -->
+            <div id="adoptions-tab" class="tab-content">
+                <h2>My Adoptions</h2>
+                <div id="adoptions-grid" class="adoptions-grid">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading your adoptions...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Success/Error Messages -->
+    <div id="message" class="message" style="display: none;"></div>
+
+    <script>
+        let currentUser = null;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUser();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Tab navigation
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabName = this.dataset.tab;
+                    showTab(tabName);
+                });
+            });
+
+            // Form submission
+            document.getElementById('post-ad-form').addEventListener('submit', handlePostAd);
+            document.getElementById('logout-btn').addEventListener('click', logout);
+        }
+
+        async function loadUser() {
+            try {
+                const response = await fetch('/api/user');
+                if (response.ok) {
+                    currentUser = await response.json();
+                    document.getElementById('user-name').textContent = `Welcome, ${currentUser.name}`;
+                } else {
+                    window.location.href = '/login.html';
+                }
+            } catch (error) {
+                window.location.href = '/login.html';
+            }
+        }
+
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            
+            // Load data for specific tabs
+            if (tabName === 'my-donations') {
+                loadMyDonations();
+            } else if (tabName === 'applications') {
+                loadMyApplications();
+            } else if (tabName === 'adoptions') {
+                loadMyAdoptions();
+            }
+        }
+
+        async function handlePostAd(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            
+            try {
+                const response = await fetch('/api/donate', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showMessage('Ad posted successfully!', 'success');
+                    e.target.reset();
+                } else {
+                    showMessage(result.error, 'error');
+                }
+            } catch (error) {
+                showMessage('Failed to post ad. Please try again.', 'error');
+            }
+        }
+
+        async function loadMyDonations() {
+            try {
+                const response = await fetch('/api/my-donations');
+                const donations = await response.json();
+                displayDonations(donations);
+            } catch (error) {
+                showMessage('Failed to load donations', 'error');
+            }
+        }
+
+        function displayDonations(donations) {
+            const container = document.getElementById('my-donations-grid');
+            
+            if (donations.length === 0) {
+                container.innerHTML = '<p class="no-data">You haven\'t donated any pets yet.</p>';
+                return;
+            }
+            
+            container.innerHTML = donations.map(donation => `
+                <div class="donation-card">
+                    <img src="${donation.image}" alt="${donation.name}" class="donation-image">
+                    <div class="donation-info">
+                        <h3>${donation.name}</h3>
+                        <p class="donation-status">Status: ${donation.status}</p>
+                        <p class="application-count">${donation.application_count} applications received</p>
+                        <div class="donation-actions">
+                            <button onclick="showApplications(${donation.id})" class="view-applications-btn">
+                                View Applications (${donation.application_count})
+                            </button>
+                        </div>
+                        ${donation.applications.length > 0 ? `
+                            <div class="applications-list" id="applications-${donation.id}" style="display: none;">
+                                ${donation.applications.map(app => `
+                                    <div class="application-item ${app.status}">
+                                        <div class="applicant-info">
+                                            <h4>${app.applicant_name}</h4>
+                                            <p>Email: ${app.applicant_email}</p>
+                                            <p>Phone: ${app.applicant_phone}</p>
+                                            <p><strong>Experience:</strong> ${app.experience}</p>
+                                            <p><strong>Living Situation:</strong> ${app.living_situation}</p>
+                                            <p><strong>Reason:</strong> ${app.reason}</p>
+                                            <p class="application-date">Applied: ${new Date(app.applied_at).toLocaleDateString()}</p>
+                                            <p class="application-status">Status: ${app.status}</p>
+                                        </div>
+                                        ${app.status === 'pending' && donation.status === 'available' ? `
+                                            <button onclick="approveApplication(${app.id})" class="approve-btn">
+                                                Approve Application
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showApplications(donationId) {
+            const applicationsList = document.getElementById(`applications-${donationId}`);
+            if (applicationsList.style.display === 'none') {
+                applicationsList.style.display = 'block';
+            } else {
+                applicationsList.style.display = 'none';
+            }
+        }
+
+        async function approveApplication(applicationId) {
+            if (!confirm('Are you sure you want to approve this application? This will finalize the adoption.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/approve-application', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ application_id: applicationId })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showMessage(result.message, 'success');
+                    loadMyDonations(); // Reload donations
+                } else {
+                    showMessage(result.error, 'error');
+                }
+            } catch (error) {
+                showMessage('Failed to approve application', 'error');
+            }
+        }
+
+        async function loadMyApplications() {
+            try {
+                const response = await fetch('/api/applications');
+                const applications = await response.json();
+                displayApplications(applications);
+            } catch (error) {
+                showMessage('Failed to load applications', 'error');
+            }
+        }
+
+        function displayApplications(applications) {
+            const container = document.getElementById('applications-grid');
+            
+            if (applications.length === 0) {
+                container.innerHTML = '<p class="no-data">You haven\'t applied for any pets yet.</p>';
+                return;
+            }
+            
+            container.innerHTML = applications.map(app => `
+                <div class="application-card ${app.status}">
+                    <img src="${app.pet_image}" alt="${app.pet_name}" class="application-image">
+                    <div class="application-info">
+                        <h3>${app.pet_name}</h3>
+                        <p class="application-status-badge status-${app.status}">${app.status.toUpperCase()}</p>
+                        <p class="application-date">Applied: ${new Date(app.applied_at).toLocaleDateString()}</p>
+                        <div class="application-details">
+                            <p><strong>Experience:</strong> ${app.experience}</p>
+                            <p><strong>Living Situation:</strong> ${app.living_situation}</p>
+                            <p><strong>Reason:</strong> ${app.reason}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadMyAdoptions() {
+            try {
+                const response = await fetch('/api/adoptions');
+                const adoptions = await response.json();
+                displayAdoptions(adoptions);
+            } catch (error) {
+                showMessage('Failed to load adoptions', 'error');
+            }
+        }
+
+        function displayAdoptions(adoptions) {
+            const container = document.getElementById('adoptions-grid');
+            
+            if (adoptions.length === 0) {
+                container.innerHTML = '<p class="no-data">You haven\'t adopted any pets yet.</p>';
+                return;
+            }
+            
+            container.innerHTML = adoptions.map(adoption => `
+                <div class="adoption-card">
+                    <img src="${adoption.image}" alt="${adoption.name}" class="adoption-image">
+                    <div class="adoption-info">
+                        <h3>${adoption.name}</h3>
+                        <p class="adoption-details">${adoption.species} • ${adoption.breed}</p>
+                        <p class="adoption-date">Adopted on ${new Date(adoption.adopted_at).toLocaleDateString()}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function logout() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                window.location.href = '/';
+            } catch (error) {
+                window.location.href = '/';
+            }
+        }
+
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = `message ${type}`;
+            messageEl.style.display = 'block';
+            
+            setTimeout(() => {
+                messageEl.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Make functions globally available
+        window.showApplications = showApplications;
+        window.approveApplication = approveApplication;
+        window.removeApplication = removeApplication;
+        window.removeDonation = removeDonation;
+        window.removeAdoption = removeAdoption;
+    </script>
+</body>
+</html>

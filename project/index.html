@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pet Adoption Center - Buy & Sell Pets Online</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-top">
+                <div class="logo">
+                    <h1>Pet Adoption Center</h1>
+                    <span>Buy & Sell Pets</span>
+                </div>
+                <div class="search-container">
+                    <div class="search-box">
+                        <input type="text" id="search-input" placeholder="What are you looking for?">
+                        <select id="location-select">
+                            <option value="">All Bangladesh</option>
+                            <option value="dhaka">Dhaka</option>
+                            <option value="chittagong">Chittagong</option>
+                            <option value="sylhet">Sylhet</option>
+                            <option value="rajshahi">Rajshahi</option>
+                        </select>
+                        <button class="search-btn">Search</button>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div id="auth-section" class="auth-section">
+                        <a href="login.html" class="login-btn">Login</a>
+                        <a href="dashboard.html" class="post-ad-btn">Post your ad</a>
+                    </div>
+                    <div id="user-section" class="user-section" style="display: none;">
+                        <span id="user-name" class="user-name"></span>
+                        <a href="dashboard.html" class="post-ad-btn">Post your ad</a>
+                        <button id="logout-btn" class="logout-btn">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Categories -->
+    <section class="categories-section">
+        <div class="container">
+            <div class="categories-grid">
+                <div class="category-item active" data-category="all">
+                    <div class="category-icon">🐾</div>
+                    <span>All Pets</span>
+                </div>
+                <div class="category-item" data-category="Dog">
+                    <div class="category-icon">🐕</div>
+                    <span>Dogs</span>
+                </div>
+                <div class="category-item" data-category="Cat">
+                    <div class="category-icon">🐱</div>
+                    <span>Cats</span>
+                </div>
+                <div class="category-item" data-category="Bird">
+                    <div class="category-icon">🐦</div>
+                    <span>Birds</span>
+                </div>
+                <div class="category-item" data-category="Rabbit">
+                    <div class="category-icon">🐰</div>
+                    <span>Rabbits</span>
+                </div>
+                <div class="category-item" data-category="Other">
+                    <div class="category-icon">🐹</div>
+                    <span>Others</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Breadcrumb -->
+    <section class="breadcrumb">
+        <div class="container">
+            <span>Home</span> > <span id="current-category">All Pets</span>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="content-wrapper">
+                <!-- Sidebar Filters -->
+                <aside class="sidebar">
+                    <div class="filter-section">
+                        <h3>Filters</h3>
+                        
+                        <div class="filter-group">
+                            <h4>Price Range</h4>
+                            <div class="price-inputs">
+                                <input type="number" id="min-price" placeholder="Min">
+                                <span>-</span>
+                                <input type="number" id="max-price" placeholder="Max">
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <h4>Age</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" value="0-1"> 0-1 years</label>
+                                <label><input type="checkbox" value="1-3"> 1-3 years</label>
+                                <label><input type="checkbox" value="3-5"> 3-5 years</label>
+                                <label><input type="checkbox" value="5+"> 5+ years</label>
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <h4>Location</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" value="dhaka"> Dhaka</label>
+                                <label><input type="checkbox" value="chittagong"> Chittagong</label>
+                                <label><input type="checkbox" value="sylhet"> Sylhet</label>
+                                <label><input type="checkbox" value="rajshahi"> Rajshahi</label>
+                            </div>
+                        </div>
+
+                        <button class="apply-filters-btn">Apply Filters</button>
+                    </div>
+                </aside>
+
+                <!-- Pet Listings -->
+                <section class="listings-section">
+                    <div class="listings-header">
+                        <div class="results-info">
+                            <span id="results-count">Loading...</span>
+                        </div>
+                        <div class="sort-options">
+                            <select id="sort-select">
+                                <option value="newest">Newest first</option>
+                                <option value="oldest">Oldest first</option>
+                                <option value="price-low">Price: Low to High</option>
+                                <option value="price-high">Price: High to Low</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="pets-grid" class="pets-grid">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Loading pets...</p>
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div id="pagination" class="pagination" style="display: none;">
+                        <button id="prev-btn" class="page-btn">Previous</button>
+                        <div id="page-numbers" class="page-numbers"></div>
+                        <button id="next-btn" class="page-btn">Next</button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Pet Detail Modal -->
+    <div id="pet-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div id="pet-details"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>PetBazar</h4>
+                    <p>Bangladesh's largest pet marketplace</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/dashboard.html">Post Ad</a></li>
+                        <li><a href="/login.html">Login</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Categories</h4>
+                    <ul>
+                        <li><a href="#" data-category="Dog">Dogs</a></li>
+                        <li><a href="#" data-category="Cat">Cats</a></li>
+                        <li><a href="#" data-category="Bird">Birds</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p>Email: info@Pet_Adoption_Center.com</p>
+                    <p>Phone: +880 1234 567890</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Pet Adoption Center. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
