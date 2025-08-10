@@ -1,0 +1,73 @@
+@@ .. @@
+                         ${donation.applications.length > 0 ? `
+                             <div class="applications-list" id="applications-${donation.id}" style="display: none;">
+                                 ${donation.applications.map(app => `
+                                     <div class="application-item ${app.status}">
+                                         <div class="applicant-info">
+                                             <h4>${app.applicant_name}</h4>
+                                             <p>Email: ${app.applicant_email}</p>
+                                             <p>Phone: ${app.applicant_phone}</p>
+                                             <p><strong>Experience:</strong> ${app.experience}</p>
+                                             <p><strong>Living Situation:</strong> ${app.living_situation}</p>
+                                             <p><strong>Reason:</strong> ${app.reason}</p>
+                                             <p class="application-date">Applied: ${new Date(app.applied_at).toLocaleDateString()}</p>
+                                             <p class="application-status">Status: ${app.status}</p>
+                                         </div>
+                                         ${app.status === 'pending' && donation.status === 'available' ? `
+                                             <button onclick="approveApplication(${app.id})" class="approve-btn">
+                                                 Approve Application
+                                             </button>
+                                         ` : ''}
+                                     </div>
+                                 `).join('')}
+                             </div>
+                         ` : ''}
++                        <div class="donation-actions">
++                            <button onclick="removeDonation(${donation.id})" class="remove-btn">
++                                Delete Donation
++                            </button>
++                        </div>
+                     </div>
+                 </div>
+@@ .. @@
+             }
+         }
+
++        async function removeDonation(donationId) {
++            if (!confirm('Are you sure you want to delete this donation? This will also remove all applications for this pet.')) {
++                return;
++            }
++            
++            try {
++                const response = await fetch('/api/remove-donation', {
++                    method: 'POST',
++                    headers: {
++                        'Content-Type': 'application/json',
++                    },
++                    body: JSON.stringify({ donation_id: donationId })
++                });
++                
++                const result = await response.json();
++                
++                if (response.ok) {
++                    showMessage(result.message, 'success');
++                    loadMyDonations(); // Reload donations
++                } else {
++                    showMessage(result.error, 'error');
++                }
++            } catch (error) {
++                showMessage('Failed to delete donation', 'error');
++            }
++        }
++
+         async function loadMyApplications() {
+@@ .. @@
+         // Make functions globally available
+         window.showApplications = showApplications;
+         window.approveApplication = approveApplication;
+-        window.removeApplication = removeApplication;
+         window.removeDonation = removeDonation;
+-        window.removeAdoption = removeAdoption;
+     </script>
+ </body>
+ </html>

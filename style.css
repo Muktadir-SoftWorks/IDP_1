@@ -1,0 +1,22 @@
+@@ .. @@
+ .adopt-btn:hover {
+     background: #218838;
+ }
+
++.delete-btn {
++    background: #dc3545;
++    color: white;
++    border: none;
++    padding: 8px 12px;
++    border-radius: 4px;
++    cursor: pointer;
++    font-size: 14px;
++    transition: background 0.3s;
++    margin-left: 10px;
++}
++
++.delete-btn:hover {
++    background: #c82333;
++}
++
+ /* Pagination */
